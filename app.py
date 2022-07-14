@@ -2,6 +2,7 @@ from flask import Flask
 from flask_restx import Api
 
 from config import Config
+from dao.model.user import User
 from setup_db import db
 from views.directors import director_ns
 from views.genres import genre_ns
@@ -17,14 +18,25 @@ def create_app(config_object):
 
 def register_extensions(app):
     db.init_app(app)
+    create_data(app, db)
     api = Api(app)
     api.add_namespace(director_ns)
     api.add_namespace(genre_ns)
     api.add_namespace(movie_ns)
 
 
+def create_data(app, db):
+    with app.app_context():
+        db.create_all()
+        u1 = User(username="dima", password="dima129837", role="user")
+        u2 = User(username="diana", password="diana9898", role="user")
+        u3 = User(username="dilara", password="dilara666", role="admin")
+        with db.session.begin():
+            db.session.add_all([u1, u2, u3])
+
+
 app = create_app(Config())
 app.debug = True
 
 if __name__ == '__main__':
-    app.run(host="localhost", port=10001, debug=True)
+    app.run(host="localhost", port=3333, debug=False)
